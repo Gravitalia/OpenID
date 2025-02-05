@@ -40,6 +40,8 @@ pub fn app(state: AppState) -> Router {
         .route("/login", post(router::login::login))
         // `POST /create` goes to `create`.
         .route("/create", post(router::create::create))
+        // `GET /users/:USER_ID` goes to `get`.
+        .route("/users/{user_id}", get(router::user::get))
         .with_state(state.clone())
         .nest("/.well-known", well_known(state))
         .layer(TraceLayer::new_for_http())

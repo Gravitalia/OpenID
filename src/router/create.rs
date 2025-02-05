@@ -3,16 +3,29 @@ use argon2::{
     Argon2, Params, Version,
 };
 use axum::{extract::State, http::StatusCode, Json};
+use regex_lite::Regex;
 use serde::{Deserialize, Serialize};
-use validator::Validate;
-
-use crate::{database::Database, user::User};
+use validator::{Validate, ValidationError};
 
 use super::{ServerError, Valid};
+use crate::{database::Database, user::User};
+
+fn validate_vanity(vanity: &str) -> Result<(), ValidationError> {
+    if !Regex::new(r"[A-Za-z0-9\-\.\_\~\!\$\&\'\(\)\*\+\,\;\=](?:[A-Za-z0-9\-\.\_\~\!\$\&\'\(\)\*\+\,\;\=]|(?:%[0-9A-Fa-f]{2}))$")
+            .map_err(|_| ValidationError::new("wtf_regex"))?
+            .is_match(vanity) {
+        return Err(ValidationError::new("alphanumerical"));
+    }
+
+    Ok(())
+}
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct Body {
-    #[validate(length(min = 2, max = 15))]
+    #[validate(
+        length(min = 2, max = 15),
+        custom(function = "validate_vanity", message = "Vanity must be alphanumeric.")
+    )]
     vanity: String,
     #[validate(email(message = "Email must be formated."))]
     email: String,
@@ -65,10 +78,7 @@ pub async fn create(
         .await?;
     let token = user.generate_token(&db.postgres).await?;
 
-    Ok((StatusCode::CREATED, Json(Response {
-        user,
-        token,
-    })))
+    Ok((StatusCode::CREATED, Json(Response { user, token })))
 }
 
 #[cfg(test)]
@@ -79,9 +89,9 @@ mod tests {
         body::Body as RequestBody,
         http::{self, Request, StatusCode},
     };
+    use http_body_util::BodyExt;
     use sqlx::{Pool, Postgres};
     use tower::ServiceExt;
-    use http_body_util::BodyExt;
 
     #[sqlx::test]
     async fn test_create_handler(pool: Pool<Postgres>) {
@@ -104,16 +114,14 @@ mod tests {
                     .method(http::Method::POST)
                     .uri("/create")
                     .header(http::header::CONTENT_TYPE, "application/json")
-                    .body(RequestBody::from(
-                        body
-                    ))
-                    .unwrap()
+                    .body(RequestBody::from(body))
+                    .unwrap(),
             )
             .await
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::CREATED);
-        
+
         let body = response.into_body().collect().await.unwrap().to_bytes();
         let body: Response = serde_json::from_slice(&body).unwrap();
         assert!(body.token.is_ascii());

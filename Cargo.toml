@@ -30,8 +30,9 @@ tower-http = {version = "0.6.2", features = [
 "cors", "trace", "tracing", "request-id", "sensitive-headers", "tokio", "timeout",
 ] }
 url = "2.5"
-validator = { version = "0.19.0", features = ["derive"] }
+validator = { version = "0.20.0", features = ["derive"] }
 hex = "0.4"
+regex-lite = "0.1"
 # Error
 thiserror = "2.0"
 # Telemetry
