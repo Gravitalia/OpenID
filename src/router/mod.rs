@@ -3,6 +3,7 @@
 pub mod create;
 pub mod login;
 pub mod status;
+pub mod user;
 
 use axum::{
     extract::{rejection::JsonRejection, FromRequest, Request},

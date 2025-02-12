@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
   password      TEXT        NOT NULL,
   avatar        TEXT,
   flags         INT         NOT NULL DEFAULT 0,
-  public_keys   INT         REFERENCES keys(id) ON DELETE CASCADE,
   suspended_at  DATE,
   deleted_at    DATE,
   created_at    DATE        NOT NULL DEFAULT NOW(), -- Millisecond precision seems... too precise

@@ -24,7 +24,7 @@ axum = { version = "0.8.1", features = ["macros"] }
 tokio =  { version = "1.42.0", features = ["rt-multi-thread", "net", "tracing"] }
 serde = "1.0.216"
 serde_json = "1.0.134"
-sqlx = { version = "0.8.2", features = ["runtime-tokio", "postgres"] }
+sqlx = { version = "0.8.2", features = ["runtime-tokio", "postgres", "chrono"] }
 tower = "0.5.2"
 tower-http = {version = "0.6.2", features = [
 "cors", "trace", "tracing", "request-id", "sensitive-headers", "tokio", "timeout",
@@ -32,6 +32,7 @@ tower-http = {version = "0.6.2", features = [
 url = "2.5"
 validator = { version = "0.19.0", features = ["derive"] }
 hex = "0.4"
+chrono = { version = "0.4.39", features = ["serde"] }
 # Error
 thiserror = "2.0"
 # Telemetry
